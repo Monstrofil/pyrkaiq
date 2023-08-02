@@ -1,7 +1,7 @@
 from ctypes import c_char, c_uint, c_int
 from enum import IntEnum
 
-from base import PrettyStructure
+from pyrkaiq.base import PrettyStructure
 
 
 class rk_aiq_ver_info_t(PrettyStructure):

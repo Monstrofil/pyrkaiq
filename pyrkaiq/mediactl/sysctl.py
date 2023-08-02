@@ -1,7 +1,7 @@
 from fcntl import ioctl
 from typing import List
 
-from mediactl.libmediactl import (
+from pyrkaiq.mediactl.libmediactl import (
     struct_media_entity_desc,
     MEDIA_IOC_ENUM_ENTITIES,
     MEDIA_ENT_ID_FLAG_NEXT

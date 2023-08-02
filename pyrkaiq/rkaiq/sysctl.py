@@ -1,9 +1,14 @@
 from typing import Callable
 
-from rkaiq.rk_types import rk_aiq_sys_ctx_t, rk_aiq_metas_t, rk_aiq_err_msg_t, rk_aiq_working_mode_t, \
+from .rk_types import (
+    rk_aiq_sys_ctx_t,
+    rk_aiq_metas_t,
+    rk_aiq_err_msg_t,
+    rk_aiq_working_mode_t,
     CamReturn
+)
 
-import libaiq_3_0_9_1
+from pyrkaiq.raw import libaiq_3_0_9_1
 
 
 def init(sensor_name: str,

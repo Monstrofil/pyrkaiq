@@ -5,16 +5,16 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from fcntl import ioctl
 
-import libaiq_3_0_9_1
-from base import PrettyStructure
-from libaiq_3_0_9_1 import *
-from mediactl.libmediactl import (
+from pyrkaiq.raw import libaiq_3_0_9_1
+from pyrkaiq.base import PrettyStructure
+from pyrkaiq.raw.libaiq_3_0_9_1 import *
+from pyrkaiq.mediactl.libmediactl import (
     struct_media_entity_desc
 )
-from mediactl.sysctl import get_media_entities
-from rkaiq import sysctl
-from rkaiq.sysctl import getBindedSnsEntNmByVd
-from v4l2 import (
+from pyrkaiq.mediactl import get_media_entities
+from pyrkaiq.rkaiq import sysctl
+from pyrkaiq.rkaiq.sysctl import getBindedSnsEntNmByVd
+from pyrkaiq.v4l2 import (
     v4l2_event_subscription,
     VIDIOC_SUBSCRIBE_EVENT,
     VIDIOC_UNSUBSCRIBE_EVENT,
