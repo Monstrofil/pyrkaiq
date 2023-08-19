@@ -3,24 +3,18 @@ import os
 import threading
 from argparse import ArgumentParser
 from dataclasses import dataclass
-from fcntl import ioctl
 
-from pyrkaiq.raw import libaiq_3_0_9_1
+from v4l2py.device import EventType, Device
+
 from pyrkaiq.base import PrettyStructure
-from pyrkaiq.raw.libaiq_3_0_9_1 import *
 from pyrkaiq.mediactl.libmediactl import (
     struct_media_entity_desc
 )
-from pyrkaiq.mediactl import get_media_entities
+from pyrkaiq.mediactl.sysctl import get_media_entities
+from pyrkaiq.raw import libaiq_3_0_9_1
+from pyrkaiq.raw.libaiq_3_0_9_1 import *
 from pyrkaiq.rkaiq import sysctl
 from pyrkaiq.rkaiq.sysctl import getBindedSnsEntNmByVd
-from pyrkaiq.v4l2 import (
-    v4l2_event_subscription,
-    VIDIOC_SUBSCRIBE_EVENT,
-    VIDIOC_UNSUBSCRIBE_EVENT,
-    VIDIOC_DQEVENT,
-    v4l2_event
-)
 
 # some dirty monkey patching to make data types pretty printable
 for subclass in libaiq_3_0_9_1.Structure.__subclasses__():
@@ -49,9 +43,8 @@ for subclass in libaiq_3_0_9_1.Structure.__subclasses__():
 # for item in RkAiqAlgoTypeEnum:
 #     print(item.name, '=', rk_aiq_uapi2_sysctl_getAxlibStatus(ctx, item, 0))
 #
-V4L2_EVENT_PRIVATE_START = 0x08000000
-CIFISP_V4L2_EVENT_STREAM_START = V4L2_EVENT_PRIVATE_START + 1
-CIFISP_V4L2_EVENT_STREAM_STOP = V4L2_EVENT_PRIVATE_START + 2
+CIFISP_V4L2_EVENT_STREAM_START = EventType.PRIVATE_START + 1
+CIFISP_V4L2_EVENT_STREAM_STOP = EventType.PRIVATE_START + 2
 
 
 #
@@ -144,29 +137,17 @@ def iter_media_devices():
         )
 
 
-def subscribe_v4l2_event(fd: int, subscribe: bool = True):
-    sub = v4l2_event_subscription()
-    sub.type = CIFISP_V4L2_EVENT_STREAM_START
-    ioctl(fd, VIDIOC_SUBSCRIBE_EVENT if subscribe else VIDIOC_UNSUBSCRIBE_EVENT, sub)
-
-    sub = v4l2_event_subscription()
-    sub.type = CIFISP_V4L2_EVENT_STREAM_STOP
-    ioctl(fd, VIDIOC_SUBSCRIBE_EVENT if subscribe else VIDIOC_UNSUBSCRIBE_EVENT, sub)
-
-
-def wait_for_event(fd: int, event_type: int):
-    event = v4l2_event()
+def wait_for_event(fd: Device, event_type: int):
     while True:
-        ioctl(fd, VIDIOC_DQEVENT, event)
+        event = fd.deque_event()
 
         if event.type == event_type:
             break
 
 
 def engine_thread(device: MediaTree):
-    print(device)
 
-    with open(device.params_device) as fd:
+    with Device(open(device.params_device)) as fd:
         try:
             ctx = sysctl.init(device.sensor_name, '/etc/iqfiles', None, None)
             print(ctx)
@@ -178,18 +159,20 @@ def engine_thread(device: MediaTree):
             sysctl.prepare(ctx, 4048, 3040, 0)
 
             logging.info('Subscribing to streaming events')
-            subscribe_v4l2_event(fd.fileno(), subscribe=True)
+            fd.subscribe_event(CIFISP_V4L2_EVENT_STREAM_START)
+            fd.subscribe_event(CIFISP_V4L2_EVENT_STREAM_STOP)
 
-            wait_for_event(fd.fileno(), CIFISP_V4L2_EVENT_STREAM_START)
+            wait_for_event(fd, CIFISP_V4L2_EVENT_STREAM_START)
             logging.info('Stream on device %s started', device.sensor_name)
 
             sysctl.start(ctx)
 
-            wait_for_event(fd.fileno(), CIFISP_V4L2_EVENT_STREAM_STOP)
+            wait_for_event(fd, CIFISP_V4L2_EVENT_STREAM_STOP)
             logging.info('Stream on device %s ended', device.sensor_name)
 
         finally:
-            subscribe_v4l2_event(fd.fileno(), subscribe=True)
+            fd.unsubscribe_event(CIFISP_V4L2_EVENT_STREAM_START)
+            fd.unsubscribe_event(CIFISP_V4L2_EVENT_STREAM_STOP)
 
 
 def main():
