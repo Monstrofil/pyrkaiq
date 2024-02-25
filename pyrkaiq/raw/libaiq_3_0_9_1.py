@@ -12736,7 +12736,7 @@ if _libs["rkaiq"].has("rk_aiq_uapi2_sysctl_regHwEvtCb", "cdecl"):
 # /root/camera_engine_rkaiq/include/uAPI2/rk_aiq_user_api2_sysctl.h: 73
 if _libs["rkaiq"].has("rk_aiq_uapi2_sysctl_init", "cdecl"):
     rk_aiq_uapi2_sysctl_init = _libs["rkaiq"].get("rk_aiq_uapi2_sysctl_init", "cdecl")
-    rk_aiq_uapi2_sysctl_init.argtypes = [String, String, String, String]
+    rk_aiq_uapi2_sysctl_init.argtypes = [String, String, rk_aiq_error_cb, rk_aiq_metas_cb]
     rk_aiq_uapi2_sysctl_init.restype = POINTER(rk_aiq_sys_ctx_t)
 
 # /root/camera_engine_rkaiq/include/uAPI2/rk_aiq_user_api2_sysctl.h: 86
@@ -13547,7 +13547,7 @@ if _libs["rkaiq"].has("rk_aiq_uapi2_getExpTimeRange", "cdecl"):
 if _libs["rkaiq"].has("rk_aiq_uapi2_setBLCMode", "cdecl"):
     rk_aiq_uapi2_setBLCMode = _libs["rkaiq"].get("rk_aiq_uapi2_setBLCMode", "cdecl")
     rk_aiq_uapi2_setBLCMode.argtypes = [POINTER(rk_aiq_sys_ctx_t), c_bool, aeMeasAreaType_t]
-    rk_aiq_uapi2_setBLCMode.restype = XCamReturn
+    rk_aiq_uapi2_setBLCMode.restype = XCamReturn0x7f824f6c40
 
 # /root/camera_engine_rkaiq/include/uAPI2/rk_aiq_user_api2_imgproc.h: 138
 if _libs["rkaiq"].has("rk_aiq_uapi2_setBLCStrength", "cdecl"):

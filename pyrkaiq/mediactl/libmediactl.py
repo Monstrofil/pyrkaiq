@@ -1295,7 +1295,7 @@ media_device = struct_media_device# /root/camera_engine_rkaiq/include/common/med
 
 # No prefix-stripping
 
-from v4l2 import _IOWR
+from v4l2py.raw import _IOWR
 MEDIA_IOC_DEVICE_INFO = _IOWR('|', 0x00, struct_media_device_info)
 MEDIA_IOC_ENUM_ENTITIES = _IOWR('|', 0x01, struct_media_entity_desc)
 

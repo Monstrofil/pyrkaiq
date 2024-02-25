@@ -14,6 +14,7 @@ from pyrkaiq.mediactl.sysctl import get_media_entities
 from pyrkaiq.raw import libaiq_3_0_9_1
 from pyrkaiq.raw.libaiq_3_0_9_1 import *
 from pyrkaiq.rkaiq import sysctl
+from pyrkaiq.rkaiq.rk_types import CamReturn
 from pyrkaiq.rkaiq.sysctl import getBindedSnsEntNmByVd
 
 # some dirty monkey patching to make data types pretty printable
@@ -146,11 +147,19 @@ def wait_for_event(fd: Device, event_type: int):
 
 
 def engine_thread(device: MediaTree):
+    @libaiq_3_0_9_1.rk_aiq_error_cb
+    def g_event_error_callback(item):
+        return CamReturn.XCAM_RETURN_NO_ERROR
+
+    @libaiq_3_0_9_1.rk_aiq_metas_cb
+    def g_event_metas_callback(item):
+        return CamReturn.XCAM_RETURN_NO_ERROR
 
     with Device(open(device.params_device)) as fd:
         try:
-            ctx = sysctl.init(device.sensor_name, '/etc/iqfiles', None, None)
-            print(ctx)
+            ctx = sysctl.init(
+                device.sensor_name, '/etc/iqfiles',
+                g_event_error_callback, g_event_metas_callback)
             sysctl.setMulCamConc(ctx, False)
 
             # for item in RkAiqAlgoTypeEnum:
@@ -158,7 +167,7 @@ def engine_thread(device: MediaTree):
 
             sysctl.prepare(ctx, 4048, 3040, 0)
 
-            logging.info('Subscribing to streaming events')
+            logging.info('Subscribing to streaming events on %s', device.params_device)
             fd.subscribe_event(CIFISP_V4L2_EVENT_STREAM_START)
             fd.subscribe_event(CIFISP_V4L2_EVENT_STREAM_STOP)
 

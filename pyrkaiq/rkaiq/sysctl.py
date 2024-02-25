@@ -1,5 +1,7 @@
+from functools import partial
 from typing import Callable
 
+from .event import Event
 from .rk_types import (
     rk_aiq_sys_ctx_t,
     rk_aiq_metas_t,
@@ -47,14 +49,8 @@ def init(sensor_name: str,
     Returns:
         return system context if success, or NULL if failure.
     """
-    c_meta_callback = libaiq_3_0_9_1.rk_aiq_metas_cb(meta_callback or 0)
-    c_error_callback = libaiq_3_0_9_1.rk_aiq_error_cb(error_callback or 0)
-
-    # TODO: need some other way to prepare callbacks and avoid garbage collector
-    init.c_meta_callback = c_meta_callback
-
     return libaiq_3_0_9_1.rk_aiq_uapi2_sysctl_init(
-        sensor_name, iqdir, None, None)
+        sensor_name, iqdir, error_callback, meta_callback)
 
 
 def prepare(ctx: rk_aiq_sys_ctx_t, width: int, height: int, mode: rk_aiq_working_mode_t) -> CamReturn:
