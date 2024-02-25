@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Callable
 
-from .event import Event
 from .rk_types import (
     rk_aiq_sys_ctx_t,
     rk_aiq_metas_t,

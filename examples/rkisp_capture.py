@@ -25,7 +25,6 @@ process = subprocess.Popen(
     command, shell=True, stdin=subprocess.PIPE)
 
 with Device('/dev/video11') as cam:
-    logging.info(cam.info)
     cam.set_format(BufferType.VIDEO_CAPTURE_MPLANE, 4040, 3040, 'NV12')
 
     video = VideoCapture(device=cam, buffer_type=BufferType.VIDEO_CAPTURE_MPLANE)
